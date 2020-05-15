@@ -1,101 +1,91 @@
 #include <iostream>
+#include <bitset>
+#include <string>
+#include <algorithm>
 using namespace std;
 
-int *getEncodeBinaryNumber(unsigned int num, int parity[])
+string decimalToBinary(unsigned int num, string binaryNum)
 {
-    int parityBit = 1;
-    for (int i = 0; i < 32; i++)
-    {
-        if (i == parityBit - 1)
-        {
-            parity[i] = 2;
-            parityBit *= 2;
-        }
-        else
-        {
-            if (num > 0)
-            {
-                parity[i] = num % 2;
-                num /= 2;
-            }
-            else
-                parity[i] = 0;
-        }
-    }
-    parity[31] = 0;
-    return parity;
+    int temp;
+    binaryNum = bitset<31>(num).to_string();
+    reverse(binaryNum.begin(), binaryNum.end());
+    return binaryNum;
 }
 
-int *getDecodeBinaryNumber(unsigned int num, int parity[])
+unsigned int binaryToDecimal(unsigned int num, string binaryNum, unsigned int result)
 {
-    for (int j = 0; j < 32; j++)
-    {
-        if (num > 0)
-        {
-            parity[j] = num % 2;
-            num /= 2;
-        }
-        else
-            parity[j] = 0;
-    }
-    return parity;
-}
-
-unsigned int getDecimalNumber(int parity[])
-{
+    int length = binaryNum.length();
     unsigned int decimal = 1;
-    unsigned int result = 0;
-    for (int k = 0; k < 32; k++)
+    result = 0;
+    for (int l = 0; l < length; l++)
     {
-        if (parity[k] == 1)
+        if (binaryNum[l] == '1')
             result += decimal;
         decimal *= 2;
     }
     return result;
 }
 
-int P1(int parity[])
+string insertParityBit(string binaryNum)
+{
+    int geometricWaterSupply = 1;
+    string parityBit = "2";
+    for (int j = 0; j < 31; j++)
+    {
+        if (j == geometricWaterSupply - 1)
+        {
+            binaryNum.insert(j, "2");
+            geometricWaterSupply *= 2;
+        }
+    }
+    return binaryNum;
+}
+
+int checkP1(string binaryNum)
 {
     int p1 = 0;
-    for (int l = 0; l < 31; l++)
+
+    for (int k = 0; k < 31; k++)
     {
-        if (l % 2 == 0)
+        if (k % 2 == 0)
         {
-            if (parity[l] == 1)
+            if (binaryNum[k] == '1')
                 p1++;
         }
     }
     return p1;
 }
 
-int P2(int parity[])
+int checkP2(string binaryNum)
 {
-    int p2 = 0;
-    int index = 1;
-    int limit = 0;
-    while (index < 31)
     {
-        if (parity[index] == 1)
-            p2++;
-        index++;
-        limit++;
-        if (limit == 2)
+        int p2 = 0;
+        int index = 1;
+        int limit = 0;
+        while (index < 31)
         {
-            index += 2;
-            limit = 0;
+            if (binaryNum[index] == '1')
+                p2++;
+            index++;
+            limit++;
+            if (limit == 2)
+            {
+                index += 2;
+                limit = 0;
+            }
         }
+        return p2;
     }
-    return p2;
 }
 
-int P4(int parity[])
+int checkP4(string binaryNum)
 {
     int p4 = 0;
     int index = 3;
     int limit = 0;
     while (index < 31)
     {
-        if (parity[index] == 1)
+        if (binaryNum[index] == '1')
             p4++;
         index++;
         limit++;
@@ -108,14 +98,14 @@ int P4(int parity[])
     return p4;
 }
 
-int P8(int parity[])
+int checkP8(string binaryNum)
 {
     int p8 = 0;
     int index = 7;
     int limit = 0;
     while (index < 31)
     {
-        if (parity[index] == 1)
+        if (binaryNum[index] == '1')
             p8++;
         index++;
         limit++;
@@ -128,87 +118,82 @@ int P8(int parity[])
     return p8;
 }
 
-int P16(int parity[])
+int checkP16(string binaryNum)
 {
     int p16 = 0;
     for (int index = 15; index < 31; index++)
     {
-        if (parity[index] == 1)
+        if (binaryNum[index] == '1')
             p16++;
     }
     return p16;
 }
 
-int *convertHammingcode(int parity[])
+string convertHammingCode(string binaryNum)
 {
-    if (P1(parity) % 2 == 1)
-        parity[0] = 1;
-    else
-        parity[0] = 0;
+    int p1, p2, p4, p8, p16;
+    p1 = checkP1(binaryNum);
+    p2 = checkP2(binaryNum);
+    p4 = checkP4(binaryNum);
+    p8 = checkP8(binaryNum);
+    p16 = checkP16(binaryNum);
 
-    if (P2(parity) % 2 == 1)
-        parity[1] = 1;
+    if (p1 % 2 == 0)
+        binaryNum[0] = '0';
     else
-        parity[1] = 0;
-
-    if (P4(parity) % 2 == 1)
-        parity[3] = 1;
+        binaryNum[0] = '1';
+    if (p2 % 2 == 0)
+        binaryNum[1] = '0';
     else
-        parity[3] = 0;
-
-    if (P8(parity) % 2 == 1)
-        parity[7] = 1;
+        binaryNum[1] = '1';
+    if (p4 % 2 == 0)
+        binaryNum[3] = '0';
     else
-        parity[7] = 0;
-
-    if (P16(parity) % 2 == 1)
-        parity[15] = 1;
+        binaryNum[3] = '1';
+    if (p8 % 2 == 0)
+        binaryNum[7] = '0';
     else
-        parity[15] = 0;
+        binaryNum[7] = '1';
+    if (p16 % 2 == 0)
+        binaryNum[15] = '0';
+    else
+        binaryNum[15] = '1';
 
-    return parity;
+    return binaryNum;
 }
 
-int *decodeHammingcode(int parity[])
+string decodeHammingCode(string binaryNum)
 {
-    int errorNumber = 0;
-    int errorCnt = 0;
+    int error = 0;
+    int p1, p2, p4, p8, p16;
+    p1 = checkP1(binaryNum);
+    p2 = checkP2(binaryNum);
+    p4 = checkP4(binaryNum);
+    p8 = checkP8(binaryNum);
+    p16 = checkP16(binaryNum);
 
-    if (P1(parity) % 2 == 1)
-    {
-        errorNumber += 1;
-        errorCnt++;
-    }
-    if (P2(parity) % 2 == 1)
-    {
-        errorNumber += 2;
-        errorCnt++;
-    }
-    if (P4(parity) % 2 == 1)
-    {
-        errorNumber += 4;
-        errorCnt++;
-    }
-    if (P8(parity) % 2 == 1)
-    {
-        errorNumber += 8;
-        errorCnt++;
-    }
-    if (P16(parity) % 2 == 1)
-    {
-        errorNumber += 16;
-        errorCnt++;
-    }
+    if (p1 % 2 == 1)
+        error += 1;
+    if (p2 % 2 == 1)
+        error += 2;
+    if (p4 % 2 == 1)
+        error += 4;
+    if (p8 % 2 == 1)
+        error += 8;
+    if (p16 % 2 == 1)
+        error += 16;
 
-    if (parity[errorNumber - 1] == 1)
-        parity[errorNumber - 1] = 0;
-    else
-        parity[errorNumber - 1] = 1;
-
-    return parity;
+    if (error != 0)
+    {
+        if (binaryNum[error - 1] == '1')
+            binaryNum[error - 1] = '0';
+        else
+            binaryNum[error - 1] = '1';
+    }
+    return binaryNum;
 }
 
-unsigned int getDecimalDecodeNumber(int parity[])
+unsigned int getDecimalDecodeNumber(string binaryNum)
 {
 
     unsigned int decimal = 1;
@@ -221,10 +206,29 @@ unsigned int getDecimalDecodeNumber(int parity[])
             geometricWaterSupply *= 2;
             continue;
         }
-        if (parity[o] == 1)
+        if (binaryNum[o] == '1')
             result += decimal;
         decimal *= 2;
     }
+    return result;
+}
+
+unsigned int getEncodeValue(unsigned int inputNum, string binaryNum, unsigned int result)
+{
+    binaryNum = decimalToBinary(inputNum, binaryNum);
+    binaryNum = insertParityBit(binaryNum);
+    binaryNum = convertHammingCode(binaryNum);
+    result = binaryToDecimal(inputNum, binaryNum, result);
+
+    return result;
+}
+
+unsigned int getDecodeValue(unsigned int inputNum, string binaryNum, unsigned int result)
+{
+    binaryNum = decimalToBinary(inputNum, binaryNum);
+    binaryNum = decodeHammingCode(binaryNum);
+    result = getDecimalDecodeNumber(binaryNum);
+
     return result;
 }
 
@@ -232,26 +236,17 @@ int main()
 {
     int numTestCases;
     cin >> numTestCases;
-    for (int q = 0; q < numTestCases; q++)
+    for (int i = 0; i < numTestCases; i++)
     {
         int type;
-        int parity[32];
-        unsigned int num;
+        unsigned int num, result;
+        string binaryNum;
         cin >> type >> num;
-
         if (type == 0)
-        {
-            getEncodeBinaryNumber(num, parity);
-            convertHammingcode(parity);
-            cout << getDecimalNumber(parity);
-        }
+            result = getEncodeValue(num, binaryNum, result);
         else
-        {
-            getDecodeBinaryNumber(num, parity);
-            decodeHammingcode(parity);
-            cout << getDecimalDecodeNumber(parity);
-        }
-        cout << endl;
+            result = getDecodeValue(num, binaryNum, result);
+        cout << result << endl;
     }
     return 0;
 }
