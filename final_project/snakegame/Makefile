@@ -1,3 +1,3 @@
 all:
-	g++ -o game Helloworld.cpp -lncursesw
+	g++ -o game snake.cpp main.cpp -lncursesw
 	./game
