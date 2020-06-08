@@ -29,7 +29,7 @@ snakeclass::snakeclass()
     for (int i = 0; i < 3; i++)
         snake.push_back(snakebody(40 + i, 10));
     points = 0;
-    del = 110000;
+    del = 100000;
     getFruit = false;
     getPoison = false;
     direction = 'l';
@@ -69,13 +69,14 @@ snakeclass::snakeclass()
 
 snakeclass::~snakeclass()
 {
-    nodelay(stdscr, false); //turn back
-    getch();                //wait until a key is pressed
+    nodelay(stdscr, false);
+    getch();
     endwin();
 }
 
 void snakeclass::putfruit()
 {
+    fruitTime = 0;
     while (1)
     {
         int fruitx = rand() % maxwidth + 1;
@@ -96,6 +97,7 @@ void snakeclass::putfruit()
 
 void snakeclass::putpoison()
 {
+    poisonTime = 0;
     while (1)
     {
         int poisonX = rand() % maxwidth + 1;
@@ -155,7 +157,6 @@ bool snakeclass::collision()
 
 void snakeclass::movesnake()
 {
-    //detect key
     int tmp = getch();
     switch (tmp)
     {
@@ -192,12 +193,28 @@ void snakeclass::movesnake()
         refresh();
         snake.pop_back();
     }
+
     if (getPoison)
     {
         move(snake[snake.size() - 1].y, snake[snake.size() - 1].x);
         printw(" ");
         refresh();
         snake.pop_back();
+    }
+
+    if (fruitTime == 50)
+    {
+        move(fruit.y, fruit.x);
+        printw(" ");
+        refresh();
+        putfruit();
+    }
+    if (poisonTime == 50)
+    {
+        move(poison.y, poison.x);
+        printw(" ");
+        refresh();
+        putpoison();
     }
 
     if (direction == 'l')
@@ -233,8 +250,8 @@ void snakeclass::gamestart()
             break;
         }
         movesnake();
-        if (direction == 'q')
-            break;
+        fruitTime++;
+        poisonTime++;
         usleep(del);
     }
 }
