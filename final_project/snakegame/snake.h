@@ -14,7 +14,7 @@ struct snakebody
 
 class snakeclass
 {
-    int points, del, maxwidth, maxheight, fruitTime, poisonTime;
+    int points, del, maxwidth, maxheight, fruitTime, poisonTime, fruitcnt, poisoncnt;
     char direction, partchar, oldalchar, fruitG, poisonR;
     bool getFruit, getPoison, gameover;
     snakebody fruit, poison;
@@ -25,6 +25,7 @@ class snakeclass
     bool collision();
     void movesnake();
     void itemTime();
+    void scoreboard();
 
 public:
     snakeclass();

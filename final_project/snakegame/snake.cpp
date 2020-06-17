@@ -1,5 +1,7 @@
 #include "snake.h"
 #include <unistd.h>
+#define height 21
+#define width 40
 using namespace std;
 snakebody::snakebody(int col, int row)
 {
@@ -19,40 +21,40 @@ snakeclass::snakeclass()
     keypad(stdscr, true);
     noecho();
     curs_set(0);
-    getmaxyx(stdscr, maxheight, maxwidth);
     partchar = 'x';
     oldalchar = (char)219;
     fruitG = '+';
     poisonR = '-';
     fruit.x = 0;
     fruit.y = 0;
+    fruitcnt = 0;
+    poisoncnt = 0;
     for (int i = 0; i < 3; i++)
-        snake.push_back(snakebody(40 + i, 10));
+        snake.push_back(snakebody(10 + i, 10));
     points = 0;
     del = 100000;
     getFruit = false;
     getPoison = false;
     direction = 'l';
-    srand(time(NULL));
-    for (int i = 0; i < maxwidth - 1; i++)
+    for (int i = 0; i < width - 1; i++)
     {
         move(0, i);
         addch(oldalchar);
     }
-    for (int i = 0; i < maxheight - 1; i++)
+    for (int i = 0; i < height - 1; i++)
     {
         move(i, 0);
         addch(oldalchar);
     }
-    for (int i = 0; i < maxwidth - 1; i++)
+    for (int i = 0; i < width - 1; i++)
     {
-        move(maxheight - 2, i);
+        move(height - 2, i);
         addch(oldalchar);
     }
 
-    for (int i = 0; i < maxheight - 1; i++)
+    for (int i = 0; i < height - 1; i++)
     {
-        move(i, maxwidth - 2);
+        move(i, width - 2);
         addch(oldalchar);
     }
     for (int i = 0; i < snake.size(); i++)
@@ -60,8 +62,26 @@ snakeclass::snakeclass()
         move(snake[i].y, snake[i].x);
         addch(partchar);
     }
-    move(maxheight - 1, 0);
-    printw("%d", points);
+    for (int i = width; i < width + 30; i++)
+    {
+        move(0, i);
+        addch(oldalchar);
+    }
+    for (int i = 0; i < 10; i++)
+    {
+        move(i, width);
+        addch(oldalchar);
+    }
+    for (int i = width; i < width + 30; i++)
+    {
+        move(10, i);
+        addch(oldalchar);
+    }
+    for (int i = 0; i < 11; i++)
+    {
+        move(i, width + 30);
+        addch(oldalchar);
+    }
     putfruit();
     putpoison();
     refresh();
@@ -79,12 +99,12 @@ void snakeclass::putfruit()
     fruitTime = 0;
     while (1)
     {
-        int fruitx = rand() % maxwidth + 1;
-        int fruity = rand() % maxheight + 1;
+        int fruitx = rand() % width + 1;
+        int fruity = rand() % height + 1;
         for (int i = 0; i < snake.size(); i++)
             if (snake[i].x == fruitx && snake[i].y == fruity)
                 continue;
-        if (fruitx >= maxwidth - 2 || fruity >= maxheight - 3)
+        if (fruitx >= width - 2 || fruity >= height - 3)
             continue;
         fruit.x = fruitx;
         fruit.y = fruity;
@@ -100,12 +120,12 @@ void snakeclass::putpoison()
     poisonTime = 0;
     while (1)
     {
-        int poisonX = rand() % maxwidth + 1;
-        int poisonY = rand() % maxheight + 1;
+        int poisonX = rand() % width + 1;
+        int poisonY = rand() % height + 1;
         for (int i = 0; i < snake.size(); i++)
             if (snake[i].x == poisonX && snake[i].y == poisonY)
                 continue;
-        if (poisonX >= maxwidth - 2 || poisonY >= maxheight - 3)
+        if (poisonX >= width - 2 || poisonY >= height - 3)
             continue;
         poison.x = poisonX;
         poison.y = poisonY;
@@ -118,21 +138,20 @@ void snakeclass::putpoison()
 
 bool snakeclass::collision()
 {
-    if (snake[0].x == 0 || snake[0].x == maxwidth - 1 || snake[0].y == 0 || snake[0].y == maxheight - 2)
+    if (snake[0].x == 0 || snake[0].x == width - 1 || snake[0].y == 0 || snake[0].y == height - 2)
         return true;
     for (int i = 2; i < snake.size(); i++)
     {
         if (snake[0].x == snake[i].x && snake[0].y == snake[i].y)
             return true;
     }
-    //collision with the fruit
+
     if (snake[0].x == fruit.x && snake[0].y == fruit.y)
     {
         getFruit = true;
         putfruit();
         points += 10;
-        move(maxheight - 1, 0);
-        printw("%d", points);
+        move(height - 1, 0);
         if ((points % 100) == 0)
             del -= 10000;
     }
@@ -145,8 +164,7 @@ bool snakeclass::collision()
         points -= 10;
         if (points < 0)
             return true;
-        move(maxheight - 1, 0);
-        printw("%d", points);
+        move(height - 1, 0);
         if ((points % 100) == 0)
             del += 10000;
     }
@@ -193,6 +211,10 @@ void snakeclass::movesnake()
         refresh();
         snake.pop_back();
     }
+    if (getFruit)
+    {
+        fruitcnt++;
+    }
 
     if (getPoison)
     {
@@ -200,6 +222,7 @@ void snakeclass::movesnake()
         printw(" ");
         refresh();
         snake.pop_back();
+        poisoncnt++;
     }
 
     if (fruitTime == 50)
@@ -239,17 +262,28 @@ void snakeclass::movesnake()
     refresh();
 }
 
+void snakeclass::scoreboard()
+{
+    move(4, width + 11);
+    printw("score: %d", points);
+    move(5, width + 11);
+    printw("fruit: %d", fruitcnt);
+    move(6, width + 10);
+    printw("poison: %d", poisoncnt);
+}
+
 void snakeclass::gamestart()
 {
     while (1)
     {
         if (collision() || gameover)
         {
-            move(12, 36);
-            printw("game_over");
+            move(9, 15);
+            printw("Game over");
             break;
         }
         movesnake();
+        scoreboard();
         fruitTime++;
         poisonTime++;
         usleep(del);
